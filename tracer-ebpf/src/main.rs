@@ -23,7 +23,7 @@ const AF_INET6: u16 = 10;
 
 const LOOPBACK_V4: u32 = 0x7F000001;
 
-const LOOPBACK_V6: u128 = 0x00000000000000000000000000000001;
+const LOOPBACK_V6: [u8; 16] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1];
 
 #[map]
 static OUTBOUND_TCP: RingBuf = RingBuf::with_byte_size(4096 * TcpConnect::LEN as u32, 0);
@@ -77,11 +77,8 @@ fn try_tracer(ctx: ProbeContext) -> Result<u32, i64> {
                 (sk_common.skc_v6_rcv_saddr.in6_u.u6_addr8,
                  sk_common.skc_v6_daddr.in6_u.u6_addr8)
             };
-            let src_addr_parsed = u128::from_be_bytes(src_addr);
 
-            let dest_addr_parsed = u128::from_be_bytes(dest_addr);
-
-            if src_addr_parsed != LOOPBACK_V6 && dest_addr_parsed != LOOPBACK_V6 {
+            if src_addr != LOOPBACK_V6 && dest_addr != LOOPBACK_V6 {
                 debug!(
                     &ctx,
                     "AF_INET6 src addr: {:i}, dest addr: {:i}",
@@ -89,7 +86,7 @@ fn try_tracer(ctx: ProbeContext) -> Result<u32, i64> {
                     dest_addr
                 );
 
-                submit(TcpConnect::Ipv6(src_addr_parsed, dest_addr_parsed ));
+                submit(TcpConnect::Ipv6(src_addr, dest_addr));
             };
 
             Ok(0)

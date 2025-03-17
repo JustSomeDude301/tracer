@@ -4,7 +4,7 @@
 #[derive(Copy, Clone)]
 pub enum TcpConnect {
     Ipv4(u32, u32),
-    Ipv6(u128, u128),
+    Ipv6([u8; 16], [u8; 16]),
 }
 
 impl TcpConnect {
